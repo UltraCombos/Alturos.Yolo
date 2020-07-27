@@ -33,6 +33,21 @@ namespace Alturos.Yolo
             report.MicrosoftVisualCPlusPlusRedistributableExists = this.IsMicrosoftVisualCPlusPlus2017Available();
 #endif
 
+            if (File.Exists("cudnn64_7.dll"))
+            {
+                report.CudnnExists = true;
+            }
+
+            var envirormentVariables = Environment.GetEnvironmentVariables(EnvironmentVariableTarget.Machine);
+            if (envirormentVariables.Contains("CUDA_PATH"))
+            {
+                report.CudaExists = true;
+            }
+            if (envirormentVariables.Contains("CUDA_PATH_V10_2"))
+            {
+                report.CudaExists = true;
+            }
+
             // Unity
             bool isUnity, isUnityIOS;
             var unityApplicationClass = Type.GetType(UnityEngineApplicationClassName);
@@ -51,18 +66,9 @@ namespace Alturos.Yolo
                 isUnityIOS = false;
             }
 
-            if (File.Exists("cudnn64_7.dll") || isUnity)
+            if (isUnity)
             {
                 report.CudnnExists = true;
-            }
-
-            var envirormentVariables = Environment.GetEnvironmentVariables(EnvironmentVariableTarget.Machine);
-            if (envirormentVariables.Contains("CUDA_PATH"))
-            {
-                report.CudaExists = true;
-            }
-            if (envirormentVariables.Contains("CUDA_PATH_V10_2"))
-            {
                 report.CudaExists = true;
             }
 
