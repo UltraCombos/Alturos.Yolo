@@ -3,12 +3,15 @@ using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace Alturos.Yolo
 {
     public class DefaultYoloSystemValidator : IYoloSystemValidator
     {
+        const string UnityEngineApplicationClassName = "UnityEngine.Application, UnityEngine";
+
         public SystemValidationReport Validate()
         {
             var report = new SystemValidationReport();
@@ -30,7 +33,25 @@ namespace Alturos.Yolo
             report.MicrosoftVisualCPlusPlusRedistributableExists = this.IsMicrosoftVisualCPlusPlus2017Available();
 #endif
 
-            if (File.Exists("cudnn64_7.dll"))
+            // Unity
+            bool isUnity, isUnityIOS;
+            var unityApplicationClass = Type.GetType(UnityEngineApplicationClassName);
+            if (unityApplicationClass != null)
+            {
+                isUnity = true;
+                // Consult value of Application.platform via reflection
+                // https://docs.unity3d.com/ScriptReference/Application-platform.html
+                var platformProperty = unityApplicationClass.GetTypeInfo().GetProperty("platform");
+                var unityRuntimePlatform = platformProperty?.GetValue(null)?.ToString();
+                isUnityIOS = (unityRuntimePlatform == "IPhonePlayer");
+            }
+            else
+            {
+                isUnity = false;
+                isUnityIOS = false;
+            }
+
+            if (File.Exists("cudnn64_7.dll") || isUnity)
             {
                 report.CudnnExists = true;
             }
